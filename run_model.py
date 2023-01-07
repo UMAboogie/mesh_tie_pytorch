@@ -619,15 +619,6 @@ def log_run_summary(root_logger, run_step_config, run_step_dir):
     root_logger.info("Message passing aggregator is " + run_step_config['message_passing_aggregator'])
     root_logger.info("Message passing steps are " + str(run_step_config['message_passing_steps']))
     root_logger.info("Attention used is " + str(run_step_config['attention']))
-    root_logger.info("Ripple used is " + str(run_step_config['ripple_used']))
-    if run_step_config['ripple_used']:
-        root_logger.info("  Ripple generation method is " + str(run_step_config['ripple_generation']))
-        root_logger.info("  Ripple generation number is " + str(run_step_config['ripple_generation_number']))
-        root_logger.info("  Ripple node selection method is " + str(run_step_config['ripple_node_selection']))
-        root_logger.info(
-            "  Ripple node selection number is " + str(run_step_config['ripple_node_selection_random_top_n']))
-        root_logger.info("  Ripple node connection method is " + str(run_step_config['ripple_node_connection']))
-        root_logger.info("  Ripple node ncross number is " + str(run_step_config['ripple_node_ncross']))
     root_logger.info("Run output directory is " + run_step_dir)
     root_logger.info("=========================================================")
     root_logger.info("")
@@ -677,13 +668,7 @@ def main(argv):
                            'num_rollouts': FLAGS.num_rollouts, 'core_model': FLAGS.core_model,
                            'message_passing_aggregator': FLAGS.message_passing_aggregator,
                            'message_passing_steps': FLAGS.message_passing_steps, 'attention': FLAGS.attention,
-                           'ripple_used': FLAGS.ripple_used,
-                           'ripple_generation': FLAGS.ripple_generation,
-                           'ripple_generation_number': FLAGS.ripple_generation_number,
-                           'ripple_node_selection': FLAGS.ripple_node_selection,
-                           'ripple_node_selection_random_top_n': FLAGS.ripple_node_selection_random_top_n,
-                           'ripple_node_connection': FLAGS.ripple_node_connection,
-                           'ripple_node_ncross': FLAGS.ripple_node_ncross, 'dataset_dir': dataset_dir,
+                           'dataset_dir': dataset_dir,
                            'last_run_dir': None}
         root_logger.info("=========================================================")
         root_logger.info("Start new run in " + str(run_step_dir))
@@ -705,13 +690,7 @@ def main(argv):
     # create or load model
     root_logger.info("Start training......")
     model = params['model'].Model(params, run_step_config['core_model'], run_step_config['message_passing_aggregator'],
-                                  run_step_config['message_passing_steps'], run_step_config['attention'],
-                                  run_step_config['ripple_used'],
-                                  run_step_config['ripple_generation'], run_step_config['ripple_generation_number'],
-                                  run_step_config['ripple_node_selection'],
-                                  run_step_config['ripple_node_selection_random_top_n'],
-                                  run_step_config['ripple_node_connection'],
-                                  run_step_config['ripple_node_ncross'])
+                                  run_step_config['message_passing_steps'], run_step_config['attention'])
     if last_run_dir is not None:
         last_run_step_dir = find_nth_latest_run_step(last_run_dir, 2)
         model.load_model(os.path.join(last_run_step_dir, 'checkpoint', "model_checkpoint"))
@@ -828,15 +807,6 @@ def main(argv):
     description.append("Message passing aggregator is " + FLAGS.message_passing_aggregator + delimiter)
     description.append("Message passing steps are " + str(FLAGS.message_passing_steps) + delimiter)
     description.append("Attention used is " + str(FLAGS.attention) + delimiter)
-    description.append("Ripple used is " + str(FLAGS.ripple_used) + delimiter)
-    if FLAGS.ripple_used:
-        description.append("    Ripple generation method is " + str(FLAGS.ripple_generation) + delimiter)
-        description.append("    Ripple generation number is " + str(FLAGS.ripple_generation_number) + delimiter)
-        description.append("    Ripple node selection method is " + str(FLAGS.ripple_node_selection) + delimiter)
-        description.append(
-            "    Ripple node selection number is " + str(FLAGS.ripple_node_selection_random_top_n) + delimiter)
-        description.append("    Ripple node connection method is " + str(FLAGS.ripple_node_connection) + delimiter)
-        description.append("    Ripple node ncross number is " + str(FLAGS.ripple_node_ncross) + delimiter)
     description.append("Elapsed time " + elapsed_time + delimiter)
     if FLAGS.mode == 'train' or FLAGS.mode == 'all':
         description.append("Train mean elapsed time " + train_mean_elapsed_time + delimiter)
@@ -934,22 +904,6 @@ def main(argv):
         entry.append(["Message passing aggregator", FLAGS.message_passing_aggregator])
         entry.append(["Message passing steps", str(FLAGS.message_passing_steps)])
         entry.append(["Attention used", str(FLAGS.attention)])
-        if FLAGS.ripple_used:
-            entry.append(["Ripple used", str(FLAGS.ripple_used)])
-            entry.append(["Ripple generation method", str(FLAGS.ripple_generation)])
-            entry.append(["Ripple generation number", str(FLAGS.ripple_generation_number)])
-            entry.append(["Ripple node selection method", str(FLAGS.ripple_node_selection)])
-            entry.append(["Ripple node selection number", str(FLAGS.ripple_node_selection_random_top_n)])
-            entry.append(["Ripple node connection method", str(FLAGS.ripple_node_connection)])
-            entry.append(["Ripple node ncross number", str(FLAGS.ripple_node_ncross)])
-        else:
-            entry.append(["Ripple used", str(FLAGS.ripple_used)])
-            entry.append(["Ripple generation method", ""])
-            entry.append(["Ripple generation number", ""])
-            entry.append(["Ripple node selection method", ""])
-            entry.append(["Ripple node selection number", ""])
-            entry.append(["Ripple node connection method", ""])
-            entry.append(["Ripple node ncross number", ""])
         entry.append(["Elapsed time", elapsed_time])
         entry.append(["Train mean elapsed time", train_mean_elapsed_time])
         entry.append(["Mean train epoch loss", str(train_loss_record['train_mean_epoch_loss'])])
@@ -973,22 +927,6 @@ def main(argv):
         entry.append(["Message passing aggregator", FLAGS.message_passing_aggregator])
         entry.append(["Message passing steps", str(FLAGS.message_passing_steps)])
         entry.append(["Attention used", str(FLAGS.attention)])
-        if FLAGS.ripple_used:
-            entry.append(["Ripple used", str(FLAGS.ripple_used)])
-            entry.append(["Ripple generation method", str(FLAGS.ripple_generation)])
-            entry.append(["Ripple generation number", str(FLAGS.ripple_generation_number)])
-            entry.append(["Ripple node selection method", str(FLAGS.ripple_node_selection)])
-            entry.append(["Ripple node selection number", str(FLAGS.ripple_node_selection_random_top_n)])
-            entry.append(["Ripple node connection method", str(FLAGS.ripple_node_connection)])
-            entry.append(["Ripple node ncross number", str(FLAGS.ripple_node_ncross)])
-        else:
-            entry.append(["Ripple used", str(FLAGS.ripple_used)])
-            entry.append(["Ripple generation method", ""])
-            entry.append(["Ripple generation number", ""])
-            entry.append(["Ripple node selection method", ""])
-            entry.append(["Ripple node selection number", ""])
-            entry.append(["Ripple node connection method", ""])
-            entry.append(["Ripple node ncross number", ""])
         entry.append(["Elapsed time", elapsed_time])
         entry.append(["Train mean elapsed time", train_mean_elapsed_time])
         entry.append(["Mean train epoch loss", str(train_loss_record['train_mean_epoch_loss'])])
@@ -1012,22 +950,6 @@ def main(argv):
         entry.append(["Message passing aggregator", FLAGS.message_passing_aggregator])
         entry.append(["Message passing steps", str(FLAGS.message_passing_steps)])
         entry.append(["Attention used", str(FLAGS.attention)])
-        if FLAGS.ripple_used:
-            entry.append(["Ripple used", str(FLAGS.ripple_used)])
-            entry.append(["Ripple generation method", str(FLAGS.ripple_generation)])
-            entry.append(["Ripple generation number", str(FLAGS.ripple_generation_number)])
-            entry.append(["Ripple node selection method", str(FLAGS.ripple_node_selection)])
-            entry.append(["Ripple node selection number", str(FLAGS.ripple_node_selection_random_top_n)])
-            entry.append(["Ripple node connection method", str(FLAGS.ripple_node_connection)])
-            entry.append(["Ripple node ncross number", str(FLAGS.ripple_node_ncross)])
-        else:
-            entry.append(["Ripple used", str(FLAGS.ripple_used)])
-            entry.append(["Ripple generation method", ""])
-            entry.append(["Ripple generation number", ""])
-            entry.append(["Ripple node selection method", ""])
-            entry.append(["Ripple node selection number", ""])
-            entry.append(["Ripple node connection method", ""])
-            entry.append(["Ripple node ncross number", ""])
         entry.append(["Elapsed time", elapsed_time])
         if FLAGS.mode == 'train' or FLAGS.mode == 'all':
             entry.append(["Train mean elapsed time", train_mean_elapsed_time])
